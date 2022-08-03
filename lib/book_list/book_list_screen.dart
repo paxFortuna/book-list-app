@@ -1,7 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
+import 'book_list_view_model.dart';
+
 class BookListScreen extends StatelessWidget {
-  const BookListScreen({Key? key}) : super(key: key);
+  BookListScreen({Key? key}) : super(key: key);
+  final viewModel = BookListViewModel();
 
   @override
   Widget build(BuildContext context) {
@@ -9,22 +13,28 @@ class BookListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('도서 리스트 앱'),
       ),
-      body: ListView(
-        children: const [
-          ListTile(
-            title: Text('Flutter 생존코딩'),
-            subtitle: Text('오준석'),
-          ),
-          ListTile(
-            title: Text('안드로이드 생존코딩'),
-            subtitle: Text('오준석'),
-          ),
-          ListTile(
-            title: Text('될 때까지 안드로이드'),
-            subtitle: Text('오준석'),
-          ),
-        ],
-      ),
+      body: StreamBuilder<QuerySnapshot>(
+    stream: viewModel.booksStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Text('Something went wrong');
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Text("Loading");
+          }
+
+          return ListView(
+            children: snapshot.data!.docs.map((DocumentSnapshot document) {
+              Map<String, dynamic> data =
+              document.data()! as Map<String, dynamic>;
+              return ListTile(
+                title: Text(data['title']),
+                subtitle: Text(data['author']),
+              );
+            }).toList(),
+          );
+        }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
         child: const Icon(Icons.add),
