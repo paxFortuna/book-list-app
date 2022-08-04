@@ -35,7 +35,8 @@ class _AddBookScreenState extends State<AddBookScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
-        title: const Text('도서 추가'),
+        title: const Text('도서 목록 추가'),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Column(
