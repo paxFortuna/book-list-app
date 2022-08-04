@@ -34,7 +34,7 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('도서 추가')),
+      appBar: AppBar(title: const Text('도서 수정')),
       body: Column(
         children: [
           TextField(
@@ -55,12 +55,24 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          viewModel.updateBook(
-            id: widget.document.id,
-            title: _titleTextController.text,
-            author: _authorTextController.text,
-          );
-          Navigator.pop(context);
+          // 유효성 검사
+          bool isValid = _titleTextController.text.isNotEmpty &&
+              _authorTextController.text.isNotEmpty;
+
+          if (isValid) {
+            viewModel.updateBook(
+              id: widget.document.id,
+              title: _titleTextController.text,
+              author: _authorTextController.text,
+            );
+            Navigator.pop(context);
+          } else {
+            // 에러 메시지 표시
+            const snackBar = SnackBar(
+              content: Text("제목과 저자를 입력해 주세요"),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
         },
         child: const Icon(Icons.done),
       ),
