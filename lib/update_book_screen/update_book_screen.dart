@@ -19,7 +19,6 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
   @override
   void initState() {
     super.initState();
-
     _titleTextController.text = widget.document['title'];
     _authorTextController.text = widget.document['author'];
   }
@@ -55,23 +54,23 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // 유효성 검사
-          bool isValid = _titleTextController.text.isNotEmpty &&
-              _authorTextController.text.isNotEmpty;
-
-          if (isValid) {
+          try {
+            //에러 날것 같은 코드
             viewModel.updateBook(
               id: widget.document.id,
               title: _titleTextController.text,
               author: _authorTextController.text,
             );
             Navigator.pop(context);
-          } else {
-            // 에러 메시지 표시
-            const snackBar = SnackBar(
-              content: Text("제목과 저자를 입력해 주세요"),
+          } catch (e) {
+            // 에러가 났을 때
+            final snackBar = SnackBar(
+              content: Text(e.toString()),
             );
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          } finally {
+            // (옵션)
+            // 에러가 나거나, 안나거나 무조건 마지막에 수행되는 블록
           }
         },
         child: const Icon(Icons.done),
