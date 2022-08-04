@@ -43,19 +43,23 @@ class _AddBookScreenState extends State<AddBookScreen> {
               labelText: '저자',
             ),
           ),
+          ElevatedButton(
+              onPressed: viewModel.isValid(
+                _titleTextController.text,
+                _authorTextController.text,
+              )
+                  ? null
+                  : () {
+                viewModel.addBook(
+                  title: _titleTextController.text,
+                  author: _authorTextController.text,
+                );
+                Navigator.pop(context);
+              },
+              child: const Text('도서 추가')),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          viewModel.addBook(
-            title: _titleTextController.text,
-            author: _authorTextController.text,
-          );
 
-          Navigator.pop(context);
-        },
-        child: const Icon(Icons.done),
-      ),
     );
   }
 }
