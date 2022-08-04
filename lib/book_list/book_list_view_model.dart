@@ -5,7 +5,7 @@ class BookListViewModel {
 
   Stream<QuerySnapshot> get booksStream => _db.collection('books').snapshots();
 
-  void deleteBook(String id){
+  void deleteBook(String id) {
     _db.collection('books').doc(id).delete();
   }
 }

@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class UpdateBookScreen extends StatefulWidget {
-  const UpdateBookScreen({Key? key, required this.document}) : super(key: key);
+  const UpdateBookScreen(this.document, {Key? key}) : super(key: key);
   final DocumentSnapshot document;
 
   @override

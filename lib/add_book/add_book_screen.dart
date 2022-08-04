@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'add_book_view_model.dart';
-import 'package:image_picker/image_picker.dart';
 
 class AddBookScreen extends StatefulWidget {
   const AddBookScreen({Key? key}) : super(key: key);
@@ -17,6 +17,7 @@ class _AddBookScreenState extends State<AddBookScreen> {
   final _authorTextController = TextEditingController();
 
   final viewModel = AddBookViewModel();
+
   final ImagePicker _picker = ImagePicker();
 
   // byte array
@@ -32,66 +33,71 @@ class _AddBookScreenState extends State<AddBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         title: const Text('도서 추가'),
       ),
-      body: Column(
-        children: [
-          GestureDetector(
-            onTap: () async {
-              XFile? image =
-              await _picker.pickImage(source: ImageSource.gallery);
-              if (image != null) {
-                // byte array
-                _bytes = await image.readAsBytes();
-                setState(() {});
-              }
-            },
-            child: _bytes == null
-                ? Container(
-              width: 200,
-              height: 200,
-              color: Colors.grey,
-            )
-                : Image.memory(_bytes!, width: 200, height: 200),
-          ),
-          const SizedBox(height: 20),
-          TextField(
-            onChanged: (_) {
-              setState(() {});
-            },
-            controller: _titleTextController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '제목',
-            ),
-          ),
-          TextField(
-            onChanged: (_) {
-              setState(() {});
-            },
-            controller: _authorTextController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '저자',
-            ),
-          ),
-          ElevatedButton(
-              onPressed: viewModel.isValid(
-                _titleTextController.text,
-                _authorTextController.text,
-              )
-                  ? null
-                  : () {
-                viewModel.addBook(
-                  title: _titleTextController.text,
-                  author: _authorTextController.text,
-                );
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            GestureDetector(
+              onTap: () async {
+                XFile? image =
+                await _picker.pickImage(source: ImageSource.gallery);
+                if (image != null) {
+                  // byte array
+                  _bytes = await image.readAsBytes();
 
-                Navigator.pop(context);
+                  setState(() {});
+                }
               },
-              child: const Text('도서 추가')),
-        ],
+              child: _bytes == null
+                  ? Container(
+                width: 200,
+                height: 150,
+                color: Colors.grey,
+              )
+                  : Image.memory(_bytes!, width: 200, height: 200),
+            ),
+            const SizedBox(height: 5),
+            TextField(
+              onChanged: (_) {
+                setState(() {});
+              },
+              controller: _titleTextController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '제목',
+              ),
+            ),
+            TextField(
+              onChanged: (_) {
+                setState(() {});
+              },
+              controller: _authorTextController,
+              decoration: const InputDecoration(
+                border: OutlineInputBorder(),
+                labelText: '저자',
+              ),
+            ),
+            ElevatedButton(
+                onPressed: viewModel.isValid(
+                  _titleTextController.text,
+                  _authorTextController.text,
+                )
+                    ? null
+                    : () {
+                  viewModel.addBook(
+                    title: _titleTextController.text,
+                    author: _authorTextController.text,
+                    bytes: _bytes,
+                  );
+
+                  Navigator.pop(context);
+                },
+                child: const Text('도서 추가')),
+          ],
+        ),
       ),
     );
   }
