@@ -1,8 +1,5 @@
-import 'dart:html';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
 import '../add_book/add_book_screen.dart';
 import '../update_book_screen/update_book_screen.dart';
 import 'book_list_view_model.dart';
@@ -48,7 +45,7 @@ class BookListScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => UpdateBookScreen()),
+                          builder: (context) => UpdateBookScreen(document: document)),
                     );
                   },
                   title: Text(data['title']),
