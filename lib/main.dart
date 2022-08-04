@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
 import 'book_list/book_list_screen.dart';
+import 'color_schemes.g.dart';
 import 'firebase_options.dart';
 
 void main() async{
@@ -20,7 +20,8 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        colorScheme: lightColorScheme,
       ),
       home:BookListScreen(),
     );
