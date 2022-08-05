@@ -9,7 +9,13 @@ void main() async{
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  // Future text() : catchError가 필요
+  test().then((value) => null).catchError((e) => print(e));
   runApp(const MyApp());
+}
+
+Future test() async {
+  throw 'test';
 }
 
 class MyApp extends StatelessWidget {
