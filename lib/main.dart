@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'book_list/book_list_screen.dart';
 import 'color_schemes.g.dart';
 import 'firebase_options.dart';
+import 'root/root_screen.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         colorScheme: lightColorScheme,
       ),
-      home:BookListScreen(),
+      home: const RootScreen(),
     );
   }
 }
