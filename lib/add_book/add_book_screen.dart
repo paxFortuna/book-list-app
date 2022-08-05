@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 
 import 'add_book_view_model.dart';
 
+
 class AddBookScreen extends StatefulWidget {
   const AddBookScreen({Key? key}) : super(key: key);
 
@@ -38,75 +39,73 @@ class _AddBookScreenState extends State<AddBookScreen> {
       ),
       body: Stack(
         children: [
-          SingleChildScrollView(
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () async {
-                    XFile? image =
-                    await _picker.pickImage(source: ImageSource.gallery);
-                    if (image != null) {
-                      // byte array
-                      _bytes = await image.readAsBytes();
+          Column(
+            children: [
+              GestureDetector(
+                onTap: () async {
+                  XFile? image =
+                  await _picker.pickImage(source: ImageSource.gallery);
+                  if (image != null) {
+                    // byte array
+                    _bytes = await image.readAsBytes();
 
-                      setState(() {});
-                    }
-                  },
-                  child: _bytes == null
-                      ? Container(
-                    width: 200,
-                    height: 200,
-                    color: Colors.grey,
+                    setState(() {});
+                  }
+                },
+                child: _bytes == null
+                    ? Container(
+                  width: 200,
+                  height: 200,
+                  color: Colors.grey,
+                )
+                    : Image.memory(_bytes!, width: 200, height: 200),
+              ),
+              const SizedBox(height: 20),
+              TextField(
+                onChanged: (_) {
+                  setState(() {});
+                },
+                controller: _titleTextController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '제목',
+                ),
+              ),
+              TextField(
+                onChanged: (_) {
+                  setState(() {});
+                },
+                controller: _authorTextController,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: '저자',
+                ),
+              ),
+              ElevatedButton(
+                  onPressed: viewModel.isValid(
+                    _titleTextController.text,
+                    _authorTextController.text,
                   )
-                      : Image.memory(_bytes!, width: 200, height: 200),
-                ),
-                const SizedBox(height: 20),
-                TextField(
-                  onChanged: (_) {
-                    setState(() {});
+                      ? null
+                      : () async {
+                    setState(() {
+                      viewModel.startLoading();
+                    });
+
+                    await viewModel.addBook(
+                      title: _titleTextController.text,
+                      author: _authorTextController.text,
+                      bytes: _bytes,
+                    );
+
+                    setState(() {
+                      viewModel.endLoading();
+                    });
+
+                    Navigator.pop(context);
                   },
-                  controller: _titleTextController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '제목',
-                  ),
-                ),
-                TextField(
-                  onChanged: (_) {
-                    setState(() {});
-                  },
-                  controller: _authorTextController,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '저자',
-                  ),
-                ),
-                ElevatedButton(
-                    onPressed: viewModel.isValid(
-                      _titleTextController.text,
-                      _authorTextController.text,
-                    )
-                        ? null
-                        : () async {
-                      setState(() {
-                        viewModel.startLoading();
-                      });
-
-                      await viewModel.addBook(
-                        title: _titleTextController.text,
-                        author: _authorTextController.text,
-                        bytes: _bytes,
-                      );
-
-                      setState(() {
-                        viewModel.endLoading();
-                      });
-
-                      Navigator.pop(context);
-                    },
-                    child: const Text('도서 추가')),
-              ],
-            ),
+                  child: const Text('도서 추가')),
+            ],
           ),
           if (viewModel.isLoading)
             Container(
