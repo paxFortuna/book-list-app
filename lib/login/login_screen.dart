@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import '../book_list/book_list_screen.dart';
+import '../home/home_screen.dart';
 import '../singup/signup_screen.dart';
 import 'login_view_model.dart';
 
@@ -13,7 +13,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-
   // firebase
   final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
@@ -22,9 +21,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordTextController = TextEditingController();
 
   final viewModel = LoginViewModel();
-
-
-  // string for displaying the error Message
   String? errorMessage;
 
   @override
@@ -34,63 +30,50 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  Widget _genEmail(){
+  Widget _genEmail() {
     return TextFormField(
-        autofocus: false,
-        controller: _emailTextController,
-        keyboardType: TextInputType.emailAddress,
-        validator: (value) {
-          if (value!.isEmpty) {
-            return ("Please Enter Your Email");
-          }
-          // reg expression for email validation
-          if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
-              .hasMatch(value)) {
-            return ("Please Enter a valid email");
-          }
-          return null;
-        },
-        onSaved: (value) {
-          _emailTextController.text = value!;
-        },
-        textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.mail),
-          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Email",
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ));
+      autofocus: false,
+      controller: _emailTextController,
+      keyboardType: TextInputType.emailAddress,
+      validator: (String? value) {
+        if (value!.isEmpty) {
+          return ("이메일 주소를 입력하세요");
+        }
+        // reg expression for email validation
+        if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]").hasMatch(value)) {
+          return ("유효한 이메일 주소를 입력하세요");
+        }
+        return null;
+      },
+      onSaved: (String? value) {
+        _emailTextController.text = value!;
+      },
+      textInputAction: TextInputAction.next,
+      decoration: _genInputDecoration("Email"),
+    );
   }
 
-  Widget _genPassword(){
+  Widget _genPassword() {
     return TextFormField(
-        autofocus: false,
-        controller: _passwordTextController,
-        obscureText: true,
-        validator: (value) {
-          RegExp regex = RegExp(r'^.{6,}$');
-          if (value!.isEmpty) {
-            return ("Password is required for login");
-          }
-          if (!regex.hasMatch(value)) {
-            return ("Enter Valid Password(Min. 6 Character)");
-          }
-        },
-        onSaved: (value) {
-          _passwordTextController.text = value!;
-        },
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.vpn_key),
-          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Password",
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ));
-
+      autofocus: false,
+      controller: _passwordTextController,
+      obscureText: true,
+      validator: (String? value) {
+        RegExp regex = RegExp(r'^.{6,}$');
+        if (value!.isEmpty) {
+          return ("로그인을 하려면 비밀번호를 입력하세요");
+        }
+        if (!regex.hasMatch(value)) {
+          return ("최소 6 글자 이상 입력해야 합니다.");
+        }
+        return null;
+      },
+      onSaved: (String? value) {
+        _passwordTextController.text = value!;
+      },
+      textInputAction: TextInputAction.done,
+      decoration: _genInputDecoration("Password"),
+    );
   }
 
   @override
@@ -130,35 +113,35 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 15),
               ElevatedButton(
                 onPressed: () {
-                      signIn(
-                        _emailTextController.text,
-                        _passwordTextController.text,
-                      );
+                  signIn(
+                    _emailTextController.text,
+                    _passwordTextController.text,
+                  );
                 },
                 child: const Text('로그인'),
               ),
               const SizedBox(height: 15),
               Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text("신규등록을 하시려면!"),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SignUpScreen()));
-                      },
-                      child: const Text(
-                        "신규등록",
-                        style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
-                      ),
-                    )
-                  ],
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  const Text("신규등록을 하시려면!"),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const SignUpScreen()));
+                    },
+                    child: const Text(
+                      "신규등록",
+                      style: TextStyle(
+                          color: Colors.redAccent,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15),
+                    ),
+                  )
+                ],
               ),
               const SizedBox(height: 15),
               ElevatedButton(
@@ -179,12 +162,15 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_formKey.currentState!.validate()) {
       try {
         await _auth
-            .signInWithEmailAndPassword(email: email, password: password)
+            .signInWithEmailAndPassword(
+              email: email,
+              password: password,
+            )
             .then((uid) => {
-          Fluttertoast.showToast(msg: "로그인에 성공하셨습니다."),
-          Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => BookListScreen())),
-        });
+                  Fluttertoast.showToast(msg: "로그인에 성공하셨습니다."),
+                  Navigator.of(context).pushReplacement(MaterialPageRoute(
+                      builder: (context) => const HomeScreen())),
+                });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
           case "invalid-email":
@@ -212,5 +198,16 @@ class _LoginScreenState extends State<LoginScreen> {
         print(error.code);
       }
     }
+  }
+
+  InputDecoration _genInputDecoration(String text) {
+    return InputDecoration(
+      prefixIcon: const Icon(Icons.mail),
+      contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+      hintText: text,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
   }
 }

@@ -29,7 +29,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         autofocus: false,
         controller: _emailTextController,
         keyboardType: TextInputType.emailAddress,
-        validator: (value) {
+        validator: (String? value) {
           if (value!.isEmpty) {
             return ("이메일 주소를 입력하세요.");
           }
@@ -40,7 +40,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           }
           return null;
         },
-        onSaved: (value) {
+        onSaved: (String? value) {
           _emailTextController.text = value!;
         },
         textInputAction: TextInputAction.next,
@@ -59,7 +59,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         autofocus: false,
         controller: _passwordTextController,
         obscureText: true,
-        validator: (value) {
+        validator: (String? value) {
           RegExp regex = RegExp(r'^.{6,}$');
           if (value!.isEmpty) {
             return ("로그인을 하려면 비밀번호가 필요합니다.");
@@ -67,8 +67,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           if (!regex.hasMatch(value)) {
             return ("유효한 비밀번호를 입력하세요(최소 6자 입력)");
           }
+          return null;
         },
-        onSaved: (value) {
+        onSaved: (String? value) {
           _passwordTextController.text = value!;
         },
         textInputAction: TextInputAction.next,
@@ -81,14 +82,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
       autofocus: false,
       controller: _confirmPasswordTextController,
       obscureText: true,
-      validator: (value) {
+      validator: (String? value) {
         if (_confirmPasswordTextController.text !=
             _passwordTextController.text) {
           return "비밀번호가 일치하지 않습니다.";
         }
         return null;
       },
-      onSaved: (value) {
+      onSaved: (String? value) {
         _confirmPasswordTextController.text = value!;
       },
       textInputAction: TextInputAction.done,
@@ -151,12 +152,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
                     signUp(
                     _emailTextController.text,
                     _passwordTextController.text,
                   );
-                  }
                 },
                 child: const Text('로그인'),
               ),
@@ -205,11 +204,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     }
   }
   postDetailsToFirestore() async {
-    // calling our firestore
+    // calling our Firestore & Firebase_auth
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     User? user = _auth.currentUser;
 
-    // calling our user model
+    // calling our userModel
     UserModel userModel = UserModel();
 
     // writing all the values

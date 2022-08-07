@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'book_list/book_list_screen.dart';
 import 'color_schemes.g.dart';
 import 'firebase_options.dart';
 import 'root/root_screen.dart';
