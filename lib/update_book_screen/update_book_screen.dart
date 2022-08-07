@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:book_list_app/update_book_screen/update_book_view_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UpdateBookScreen extends StatefulWidget {
   const UpdateBookScreen(this.document, {Key? key}) : super(key: key);
@@ -15,12 +18,17 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
   final _authorTextController = TextEditingController();
 
   final viewModel = UpdateBookViewModel();
+  final ImagePicker _picker = ImagePicker();
+
+  // byte array
+  Uint8List? _bytes;
 
   @override
   void initState() {
     super.initState();
     _titleTextController.text = widget.document['title'];
     _authorTextController.text = widget.document['author'];
+    _bytes = widget.document['imageUrl'];
   }
 
   @override
@@ -33,47 +41,91 @@ class _UpdateBookScreenState extends State<UpdateBookScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('도서 수정')),
-      body: Column(
-        children: [
-          TextField(
-            controller: _titleTextController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '제목',
+        appBar: AppBar(
+          title: const Text('도서 수정'),
+          centerTitle: true,
+        ),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Column(
+              children: [
+                GestureDetector(
+                  onTap: () async {
+                    XFile? image =
+                    await _picker.pickImage(source: ImageSource.gallery);
+                    if (image != null) {
+                      // byte array
+                      _bytes = await image.readAsBytes();
+
+                      setState(() {});
+                    }
+                  },
+                  child: _bytes == null
+                      ? Container(
+                    width: 200,
+                    height: 200,
+                    color: Colors.grey,
+                  )
+                      : Image.memory(_bytes!, width: 200, height: 200),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                  controller: _titleTextController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '제목',
+                  ),
+                ),
+                TextField(
+                  onChanged: (_) {
+                    setState(() {});
+                  },
+                  controller: _authorTextController,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: '저자',
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                    onPressed: viewModel.isValid(
+                      _titleTextController.text,
+                      _authorTextController.text,
+                    )
+                        ? null
+                        : () async {
+                      setState(() {
+                        viewModel.startLoading();
+                      });
+
+                      await viewModel.updateBook(
+                        title: _titleTextController.text,
+                        author: _authorTextController.text,
+                        bytes: _bytes,
+                      );
+
+                      setState(() {
+                        viewModel.endLoading();
+                      });
+
+                      Navigator.pop(context);
+                    },
+                    child: const Text('도서 수정')),
+              ],
             ),
-          ),
-          TextField(
-            controller: _authorTextController,
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: '저자',
-            ),
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          try {
-            //에러 날것 같은 코드
-            viewModel.updateBook(
-              id: widget.document.id,
-              title: _titleTextController.text,
-              author: _authorTextController.text,
-            );
-            Navigator.pop(context);
-          } catch (e) {
-            // 에러가 났을 때
-            final snackBar = SnackBar(
-              content: Text(e.toString()),
-            );
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
-          } finally {
-            // (옵션)
-            // 에러가 나거나, 안나거나 무조건 마지막에 수행되는 블록
-          }
-        },
-        child: const Icon(Icons.done),
+            if (viewModel.isLoading)
+              Container(
+                color: Colors.black45,
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

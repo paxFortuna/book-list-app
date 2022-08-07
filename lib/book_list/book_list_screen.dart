@@ -16,6 +16,7 @@ class BookListScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('도서 리스트 앱'),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
@@ -31,14 +32,11 @@ class BookListScreen extends StatelessWidget {
             if (snapshot.hasError) {
               return const Text('Something went wrong');
             }
-
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Text("Loading");
             }
-
             return ListView(
               children: snapshot.data!.docs.map((DocumentSnapshot document) {
-
                 Book book = document.data()! as Book;
 
                 return Dismissible(
@@ -59,13 +57,13 @@ class BookListScreen extends StatelessWidget {
                             builder: (context) => UpdateBookScreen(document)),
                       );
                     },
-                    title: Text(book.title),
-                    subtitle: Text(book.author),
                     leading: Image.network(
                       book.imageUrl,
                       width: 100,
                       height: 100,
                     ),
+                    title: Text(book.title),
+                    subtitle: Text(book.author),
                   ),
                 );
               }).toList(),
