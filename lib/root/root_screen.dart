@@ -1,7 +1,6 @@
 import 'package:book_list_app/book_list/book_list_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 import '../login/login_screen.dart';
 
 class RootScreen extends StatelessWidget {

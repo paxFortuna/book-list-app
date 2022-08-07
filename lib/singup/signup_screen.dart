@@ -16,7 +16,6 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
 
   final _auth = FirebaseAuth.instance;
-
   final _formKey = GlobalKey<FormState>();
   String? errorMessage;
 
@@ -73,15 +72,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
           _passwordTextController.text = value!;
         },
         textInputAction: TextInputAction.next,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.vpn_key),
-          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Password",
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ));
-
+        decoration:_genDecoration("Password"),
+        );
   }
 
   Widget _genConfirmPasswordField(){
@@ -100,20 +92,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _confirmPasswordTextController.text = value!;
       },
       textInputAction: TextInputAction.done,
-      decoration: InputDecoration(
-        prefixIcon: const Icon(Icons.vpn_key),
-        contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-        hintText: "Confirm Password",
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+      decoration: _genDecoration("Confirm Password"),
+    );
+  }
+
+  InputDecoration _genDecoration(String text) {
+    return InputDecoration(
+      prefixIcon: const Icon(Icons.vpn_key),
+      contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+      hintText: text,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
       ),
     );
-
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -209,19 +204,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     }
   }
-
   postDetailsToFirestore() async {
     // calling our firestore
-    // calling our user model
-    // sedning these values
-
     FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
     User? user = _auth.currentUser;
 
+    // calling our user model
     UserModel userModel = UserModel();
 
     // writing all the values
     userModel.email = user!.email;
+    // userModel.password =user!.password;
     userModel.uid = user.uid;
 
     await firebaseFirestore

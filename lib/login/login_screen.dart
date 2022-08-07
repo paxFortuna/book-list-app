@@ -1,9 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
 import '../book_list/book_list_screen.dart';
-import '../home/home_screen.dart';
 import '../singup/signup_screen.dart';
 import 'login_view_model.dart';
 
@@ -64,7 +62,6 @@ class _LoginScreenState extends State<LoginScreen> {
             borderRadius: BorderRadius.circular(10),
           ),
         ));
-
   }
 
   Widget _genPassword(){
@@ -95,9 +92,9 @@ class _LoginScreenState extends State<LoginScreen> {
         ));
 
   }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('로그인'),
@@ -186,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
             .then((uid) => {
           Fluttertoast.showToast(msg: "로그인에 성공하셨습니다."),
           Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => HomeScreen())),
+              MaterialPageRoute(builder: (context) => BookListScreen())),
         });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
