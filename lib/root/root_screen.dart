@@ -13,9 +13,8 @@ class RootScreen extends StatelessWidget {
       stream: FirebaseAuth.instance.authStateChanges(),
       builder: (context, snapshot) {
         User? user = snapshot.data;
-
         if (user== null){
-          return LoginScreen();
+          return const LoginScreen();
         }
         return BookListScreen();
       }

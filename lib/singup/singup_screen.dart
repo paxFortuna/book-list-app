@@ -1,38 +1,31 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
-import '../book_list/book_list_screen.dart';
-import '../singup/singup_screen.dart';
-import 'login_view_model.dart';
+import '../model/user_model.dart';
+import '../root/root_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<SignUpScreen> createState() => _SignUpScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-
-  final _emailTextController = TextEditingController();
-  final _passwordTextController = TextEditingController();
-
-  final viewModel = LoginViewModel();
-
-  // firebase
+class _SignUpScreenState extends State<SignUpScreen> {
   final _auth = FirebaseAuth.instance;
 
   // string for displaying the error Message
   String? errorMessage;
 
-  @override
-  void dispose() {
-    _emailTextController.dispose();
-    _passwordTextController.dispose();
-    super.dispose();
-  }
+  // our form key
+  final _formKey = GlobalKey<FormState>();
+
+  // editing Controller
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
+  final _confirmPasswordTextController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +64,7 @@ class _LoginScreenState extends State<LoginScreen> {
         controller: _passwordTextController,
         obscureText: true,
         validator: (value) {
-          RegExp regex = new RegExp(r'^.{6,}$');
+          RegExp regex = RegExp(r'^.{6,}$');
           if (value!.isEmpty) {
             return ("Password is required for login");
           }
@@ -82,7 +75,7 @@ class _LoginScreenState extends State<LoginScreen> {
         onSaved: (value) {
           _passwordTextController.text = value!;
         },
-        textInputAction: TextInputAction.done,
+        textInputAction: TextInputAction.next,
         decoration: InputDecoration(
           prefixIcon: const Icon(Icons.vpn_key),
           contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
@@ -92,9 +85,39 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ));
 
+    //confirm password field
+    final confirmPasswordField = TextFormField(
+        autofocus: false,
+        controller: _confirmPasswordTextController,
+        obscureText: true,
+        validator: (value) {
+          if (_confirmPasswordTextController.text !=
+              _passwordTextController.text) {
+            return "Password don't match";
+          }
+          return null;
+        },
+        onSaved: (value) {
+          _confirmPasswordTextController.text = value!;
+        },
+        textInputAction: TextInputAction.done,
+        decoration: InputDecoration(
+          prefixIcon: const Icon(Icons.vpn_key),
+          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+          hintText: "Confirm Password",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ));
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('로그인'),
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.arrow_back, color: Colors.red),
+        ),
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -104,61 +127,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(35.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      children: [
+                        SizedBox(
                           height: 150,
                           child: Image.asset(
                             "assets/tarotWheel.png",
-                            fit: BoxFit.contain,
-                          )),
-                      const SizedBox(height: 45),
-                      emailField,
-                      const SizedBox(height: 25),
-                      passwordField,
-                      const SizedBox(height: 15),
-                    ],
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                        const SizedBox(height: 45),
+                        emailField,
+                        const SizedBox(height: 20),
+                        passwordField,
+                        const SizedBox(height: 20),
+                        confirmPasswordField,
+                        const SizedBox(height: 20),
+                      ],
+                    ),
                   ),
                 ),
               ),
               ElevatedButton(
                 onPressed: () {
-                  signIn(
+                  signUp(
                     _emailTextController.text,
                     _passwordTextController.text,
                   );
                 },
                 child: const Text('로그인'),
-              ),
-              //
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    const Text("신규등록을 하시려면!"),
-                    const SizedBox(width: 5),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const SignUpScreen()));
-                      },
-                      child: const Text(
-                        "신규등록",
-                        style: TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 15),
-                      ),
-                    )
-                  ]),
-              ElevatedButton(
-                onPressed: () {
-                  viewModel.signInWithGoogle();
-                },
-                child: const Text('Goggle'),
               ),
             ],
           ),
@@ -167,17 +166,15 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  // login function
-  void signIn(String email, String password) async {
+  void signUp(String email, String password) async {
     if (_formKey.currentState!.validate()) {
       try {
         await _auth
-            .signInWithEmailAndPassword(email: email, password: password)
-            .then((uid) => {
-                  Fluttertoast.showToast(msg: "Login Successful"),
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => BookListScreen())),
-                });
+            .createUserWithEmailAndPassword(email: email, password: password)
+            .then((value) => {postDetailsToFirestore()})
+            .catchError((e) {
+          Fluttertoast.showToast(msg: e!.message);
+        });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
           case "invalid-email":
@@ -205,5 +202,31 @@ class _LoginScreenState extends State<LoginScreen> {
         print(error.code);
       }
     }
+  }
+
+  postDetailsToFirestore() async {
+    // calling our firestore
+    // calling our user model
+    // sedning these values
+
+    FirebaseFirestore firebaseFirestore = FirebaseFirestore.instance;
+    User? user = _auth.currentUser;
+
+    UserModel userModel = UserModel();
+
+    // writing all the values
+    userModel.email = user!.email;
+    userModel.uid = user.uid;
+
+    await firebaseFirestore
+        .collection("users")
+        .doc(user.uid)
+        .set(userModel.toJson());
+    Fluttertoast.showToast(msg: "Account created successfully :) ");
+
+    Navigator.pushAndRemoveUntil(
+        (context),
+        MaterialPageRoute(builder: (context) => const RootScreen()),
+        (route) => false);
   }
 }
