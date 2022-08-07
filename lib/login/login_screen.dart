@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../book_list/book_list_screen.dart';
-import '../singup/singup_screen.dart';
+import '../home/home_screen.dart';
+import '../singup/signup_screen.dart';
 import 'login_view_model.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,6 +15,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  // firebase
+  final _auth = FirebaseAuth.instance;
   final _formKey = GlobalKey<FormState>();
 
   final _emailTextController = TextEditingController();
@@ -21,8 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final viewModel = LoginViewModel();
 
-  // firebase
-  final _auth = FirebaseAuth.instance;
 
   // string for displaying the error Message
   String? errorMessage;
@@ -34,10 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    //email field
-    final emailField = TextFormField(
+  Widget _genEmail(){
+    return TextFormField(
         autofocus: false,
         controller: _emailTextController,
         keyboardType: TextInputType.emailAddress,
@@ -65,13 +65,15 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ));
 
-    //password field
-    final passwordField = TextFormField(
+  }
+
+  Widget _genPassword(){
+    return TextFormField(
         autofocus: false,
         controller: _passwordTextController,
         obscureText: true,
         validator: (value) {
-          RegExp regex = new RegExp(r'^.{6,}$');
+          RegExp regex = RegExp(r'^.{6,}$');
           if (value!.isEmpty) {
             return ("Password is required for login");
           }
@@ -92,9 +94,14 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ));
 
+  }
+  @override
+  Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('로그인'),
+        centerTitle: true,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -103,41 +110,42 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 color: Colors.white,
                 child: Padding(
-                  padding: const EdgeInsets.all(35.0),
+                  padding: const EdgeInsets.all(25.0),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       SizedBox(
-                          height: 150,
+                          height: 200,
                           child: Image.asset(
                             "assets/tarotWheel.png",
                             fit: BoxFit.contain,
                           )),
-                      const SizedBox(height: 45),
-                      emailField,
+                      const SizedBox(height: 35),
+                      _genEmail(),
                       const SizedBox(height: 25),
-                      passwordField,
+                      _genPassword(),
                       const SizedBox(height: 15),
                     ],
                   ),
                 ),
               ),
+              const SizedBox(height: 15),
               ElevatedButton(
                 onPressed: () {
-                  signIn(
-                    _emailTextController.text,
-                    _passwordTextController.text,
-                  );
+                      signIn(
+                        _emailTextController.text,
+                        _passwordTextController.text,
+                      );
                 },
                 child: const Text('로그인'),
               ),
-              //
+              const SizedBox(height: 15),
               Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     const Text("신규등록을 하시려면!"),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 10),
                     GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -153,7 +161,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontSize: 15),
                       ),
                     )
-                  ]),
+                  ],
+              ),
+              const SizedBox(height: 15),
               ElevatedButton(
                 onPressed: () {
                   viewModel.signInWithGoogle();
@@ -174,32 +184,32 @@ class _LoginScreenState extends State<LoginScreen> {
         await _auth
             .signInWithEmailAndPassword(email: email, password: password)
             .then((uid) => {
-                  Fluttertoast.showToast(msg: "Login Successful"),
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) => BookListScreen())),
-                });
+          Fluttertoast.showToast(msg: "로그인에 성공하셨습니다."),
+          Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => HomeScreen())),
+        });
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
           case "invalid-email":
-            errorMessage = "Your email address appears to be malformed.";
+            errorMessage = "이메일주소가 @ 형식에 맞지 않습니다.";
             break;
           case "wrong-password":
-            errorMessage = "Your password is wrong.";
+            errorMessage = "비밀번호가 틀렸습니다.";
             break;
           case "user-not-found":
-            errorMessage = "User with this email doesn't exist.";
+            errorMessage = "이메일이 존재하지 않습니다.";
             break;
           case "user-disabled":
-            errorMessage = "User with this email has been disabled.";
+            errorMessage = "사용할 수 없는 이메일 입니다.";
             break;
           case "too-many-requests":
-            errorMessage = "Too many requests";
+            errorMessage = "request가 너무 많습니다.";
             break;
           case "operation-not-allowed":
-            errorMessage = "Signing in with Email and Password is not enabled.";
+            errorMessage = "이메일과 비밀번호가 유효하지 않습니다.";
             break;
           default:
-            errorMessage = "An undefined Error happened.";
+            errorMessage = "알 수 없는 에러가 발생했습니다./n다시 시작해주세요.";
         }
         Fluttertoast.showToast(msg: errorMessage!);
         print(error.code);

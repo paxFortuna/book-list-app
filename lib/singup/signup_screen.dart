@@ -14,34 +14,30 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+
   final _auth = FirebaseAuth.instance;
 
-  // string for displaying the error Message
-  String? errorMessage;
-
-  // our form key
   final _formKey = GlobalKey<FormState>();
+  String? errorMessage;
 
   // editing Controller
   final _emailTextController = TextEditingController();
   final _passwordTextController = TextEditingController();
   final _confirmPasswordTextController = TextEditingController();
 
-  @override
-  Widget build(BuildContext context) {
-    //email field
-    final emailField = TextFormField(
+  Widget _genEmail(){
+    return TextFormField(
         autofocus: false,
         controller: _emailTextController,
         keyboardType: TextInputType.emailAddress,
         validator: (value) {
           if (value!.isEmpty) {
-            return ("Please Enter Your Email");
+            return ("이메일 주소를 입력하세요.");
           }
           // reg expression for email validation
           if (!RegExp("^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+.[a-z]")
               .hasMatch(value)) {
-            return ("Please Enter a valid email");
+            return ("정확한 이메일 주소를 입력하세요.");
           }
           return null;
         },
@@ -58,18 +54,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
         ));
 
-    //password field
-    final passwordField = TextFormField(
+  }
+  Widget _genPassword() {
+    return TextFormField(
         autofocus: false,
         controller: _passwordTextController,
         obscureText: true,
         validator: (value) {
           RegExp regex = RegExp(r'^.{6,}$');
           if (value!.isEmpty) {
-            return ("Password is required for login");
+            return ("로그인을 하려면 비밀번호가 필요합니다.");
           }
           if (!regex.hasMatch(value)) {
-            return ("Enter Valid Password(Min. 6 Character)");
+            return ("유효한 비밀번호를 입력하세요(최소 6자 입력)");
           }
         },
         onSaved: (value) {
@@ -85,30 +82,37 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ),
         ));
 
-    //confirm password field
-    final confirmPasswordField = TextFormField(
-        autofocus: false,
-        controller: _confirmPasswordTextController,
-        obscureText: true,
-        validator: (value) {
-          if (_confirmPasswordTextController.text !=
-              _passwordTextController.text) {
-            return "Password don't match";
-          }
-          return null;
-        },
-        onSaved: (value) {
-          _confirmPasswordTextController.text = value!;
-        },
-        textInputAction: TextInputAction.done,
-        decoration: InputDecoration(
-          prefixIcon: const Icon(Icons.vpn_key),
-          contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
-          hintText: "Confirm Password",
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ));
+  }
+
+  Widget _genConfirmPasswordField(){
+    return TextFormField(
+      autofocus: false,
+      controller: _confirmPasswordTextController,
+      obscureText: true,
+      validator: (value) {
+        if (_confirmPasswordTextController.text !=
+            _passwordTextController.text) {
+          return "비밀번호가 일치하지 않습니다.";
+        }
+        return null;
+      },
+      onSaved: (value) {
+        _confirmPasswordTextController.text = value!;
+      },
+      textInputAction: TextInputAction.done,
+      decoration: InputDecoration(
+        prefixIcon: const Icon(Icons.vpn_key),
+        contentPadding: const EdgeInsets.fromLTRB(20, 15, 20, 15),
+        hintText: "Confirm Password",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+    );
+
+  }
+  @override
+  Widget build(BuildContext context) {
 
     return Scaffold(
       appBar: AppBar(
@@ -139,11 +143,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 45),
-                        emailField,
+                        _genEmail(),
                         const SizedBox(height: 20),
-                        passwordField,
+                        _genPassword(),
                         const SizedBox(height: 20),
-                        confirmPasswordField,
+                        _genConfirmPasswordField(),
                         const SizedBox(height: 20),
                       ],
                     ),
@@ -152,10 +156,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  signUp(
+                  if (_formKey.currentState!.validate()) {
+                    signUp(
                     _emailTextController.text,
                     _passwordTextController.text,
                   );
+                  }
                 },
                 child: const Text('로그인'),
               ),
@@ -178,25 +184,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
       } on FirebaseAuthException catch (error) {
         switch (error.code) {
           case "invalid-email":
-            errorMessage = "Your email address appears to be malformed.";
+            errorMessage = "이메일주소가 @ 형식에 맞지 않습니다.";
             break;
           case "wrong-password":
-            errorMessage = "Your password is wrong.";
+            errorMessage = "비밀번호가 틀렸습니다.";
             break;
           case "user-not-found":
-            errorMessage = "User with this email doesn't exist.";
+            errorMessage = "이메일이 존재하지 않습니다.";
             break;
           case "user-disabled":
-            errorMessage = "User with this email has been disabled.";
+            errorMessage = "사용할 수 없는 이메일 입니다.";
             break;
           case "too-many-requests":
-            errorMessage = "Too many requests";
+            errorMessage = "request가 너무 많습니다.";
             break;
           case "operation-not-allowed":
-            errorMessage = "Signing in with Email and Password is not enabled.";
+            errorMessage = "이메일과 비밀번호가 유효하지 않습니다.";
             break;
           default:
-            errorMessage = "An undefined Error happened.";
+            errorMessage = "알 수 없는 에러가 발생했습니다./n다시 시작해주세요.";
         }
         Fluttertoast.showToast(msg: errorMessage!);
         print(error.code);
@@ -222,11 +228,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         .collection("users")
         .doc(user.uid)
         .set(userModel.toJson());
-    Fluttertoast.showToast(msg: "Account created successfully :) ");
+    Fluttertoast.showToast(msg: "계정등록에 성공했습니다.");
 
     Navigator.pushAndRemoveUntil(
         (context),
         MaterialPageRoute(builder: (context) => const RootScreen()),
-        (route) => false);
+            (route) => false);
   }
 }
