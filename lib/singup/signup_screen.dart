@@ -213,7 +213,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
     // writing all the values
     userModel.email = user!.email;
+
     // userModel.password =user!.password;
+
     userModel.uid = user.uid;
 
     await firebaseFirestore

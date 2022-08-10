@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Welcome"),
+        title: const Text("Welcome Screen"),
         centerTitle: true,
       ),
       body: Center(
@@ -57,7 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(
                 height: 10,
               ),
-              Text("${loggedInUser.email}",
+              Text("${loggedInUser.email}님!! 반갑습니다.",
                   style: const TextStyle(
                     color: Colors.black54,
                     fontWeight: FontWeight.w500,
