@@ -91,22 +91,24 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(25.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                          height: 200,
-                          child: Image.asset(
-                            "assets/tarotWheel.png",
-                            fit: BoxFit.contain,
-                          )),
-                      const SizedBox(height: 35),
-                      _genEmail(),
-                      const SizedBox(height: 25),
-                      _genPassword(),
-                      const SizedBox(height: 15),
-                    ],
+                  child: Form(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                            height: 200,
+                            child: Image.asset(
+                              "assets/tarotWheel.png",
+                              fit: BoxFit.contain,
+                            )),
+                        const SizedBox(height: 35),
+                        _genEmail(),
+                        const SizedBox(height: 25),
+                        _genPassword(),
+                        const SizedBox(height: 15),
+                      ],
+                    ),
                   ),
                 ),
               ),
